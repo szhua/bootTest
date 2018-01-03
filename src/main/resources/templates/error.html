@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${exception}"></title>
+    <link rel="stylesheet" th:href="@{/style.css}" href="../static/style.css"/>
+</head>
+<body>
+
+<!--  timestamp ：错误发生的时间。
+  status ：HTTP状态码。
+  error ：错误原因。
+  exception ：异常的类名。
+  message ：异常消息（如果这个错误是由异常引起的）。
+  errors ： BindingResult 异常里的各种错误（如果这个错误是由异常引起的）。-->
+
+<div class="errorPage">
+    <span class="oops">Oops!</span><br/>
+    <img th:src="@{/img/error.png}" src="../static/img/error.png"></img>
+    <p th:text="${status}"></p>
+    <p>There seems to be a problem with the page you requested
+        (<span th:text="${path}"></span>).</p>
+    <p th:text="${'Details: ' + message}"></p>
+    <p th:text="${error}"></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <!--使用bootStrap作为前端魔板-->
+
+    <link rel="stylesheet" type="text/css"  href="../static/css/style.css" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" type="text/css"  href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}" />
+    <script src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+    <script src="../static/js/vue.js" th:src="@{/js/vue.js}"></script>
+    <script th:src="@{/js/bootstrap.js}" src="../static/js/bootstrap.js"></script>
+
+    <script th:inline="javascript">
+
+        //使用vue能够真正的做到响应式编程 ；
+        $(function () {
+           var vm =new Vue(
+               {el:"#readinglist",
+                data:{
+                   readinglist:[]
+                },
+                methods:{
+                }
+               }
+           );
+          window.vm =vm ;
+          $.getJSON('/api/readinglist?reader='+[[${reader}]])
+              .done(function (data) {
+               window.vm.readinglist =data ;
+              })
+              .fail(function (jqXHR, textStatu) {
+                  alert('Error: ' + jqXHR.status);
+              });
+           $("#add").submit(function (e) {
+                 //防止重复提交
+                 e.preventDefault() ;
+                 var book ={
+                     title: $(this).find('input[name=title]').val(),
+                     isbn: $(this).find('input[name=isbn]').val(),
+                     reader: $(this).find('input[name=reader]').val(),
+                     author: $(this).find('input[name=author]').val(),
+                     description: $(this).find('textarea[name=description]').val(),
+                     reader:[[${reader}]]
+                 }
+                 console.log(book)
+                $.ajax({
+                    type:'post',
+                    dataType:'json',
+                    //使用conentType：{json 的话 填写 application/json }
+                    //此处contoller中要求填写的是book实体：application/x-www-form-urlencoded
+                    contentType:"application/x-www-form-urlencoded",
+                    url:"/api/readinglist",
+                    data:book
+                }).done(function (data) {
+                    console.log(data);
+                    vm.readinglist.push(data);
+                }).fail(function (jqXHR,textStatus) {
+                    alert("ERROR: "+jqXHR.starts )
+                });
+           });
+        })
+    </script>
+
+
+</head>
+<body>
+<h2  >Your reading list </h2>
+<div id="readinglist" class="container panel text-left">
+    <div >
+        <dl v-for="book in readinglist">
+           <div class="glyphicon-comment">
+               <dt class="bookHeadline">
+                   <!--vue 和 thymeleaf一起使用-->
+                   <a v-text="book.title" th:href="${url}" class="modal-title">Title</a> by
+                   <span v-text="book.auhor">author</span>
+                   (Isbn<span v-text="book.isbn" ></span>)
+               </dt>
+               <dd class="bookDescription">
+                   <p v-text="book.description" class="text-info"  >Description</p>
+                   <span v-if="book.description==null" class="bg-warning">No Description</span>
+               </dd>
+           </div>
+        </dl>
+    </div>
+
+    <div v-if="readinglist==false">
+        <p class="bg-warning text-danger text-center" >You have no books in your book list</p>
+    </div>
+</div>
+
+<h2>Add a book</h2>
+
+<form method="POST"  id="add" >
+    <label th:for="title" >Title:</label>
+        <input type="text" name="title" size="50"></input><br/>
+
+    <label th:for="author">Author:</label>
+    <input type="text" name="author" size="50"></input><br/>
+    <label th:for="isbn">ISBN:</label>
+    <input type="text" name="isbn" size="15"></input><br/>
+    <label th:for="description">Description:</label><br/>
+    <textarea name="description" cols="80" rows="5">
+</textarea><br/>
+    <input type="submit"></input>
+</form>
+
+
+
+</body>
+</html>
